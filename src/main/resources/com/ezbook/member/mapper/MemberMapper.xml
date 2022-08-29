@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ezbook.member.mapper.MemberMapper">
+
+	<!-- 로그인 처리  -->
+	<select id="login" resultType="com.ezbook.member.vo.LoginVO">
+		select m.id, m.pw, m.name, m.gradeNo, g.gradeName
+		from member m, grade g
+		where (m.id = #{id} AND m.pw = #{pw}) AND (m.gradeNo = g.gradeNo)
+	</select>
+	
+	<!-- 회원가입 처리 -->
+	<insert id="write">
+		insert into member(id, pw, name, gender, birth, tel, addr1, addr2, addr3, email)
+		values(#{id}, #{pw}, #{name}, #{gender}, #{birth}, #{tel}, #{addr1}, #{addr2}, #{addr3}, #{email})
+	</insert>
+	
+	<!-- ID 중복 체크 -->
+	<select id="idCheck" resultType="java.lang.String">
+		select id from member
+		where id = #{id}
+	</select>
+	
+	<!-- ID 찾기 -->
+	<select id="find_id" parameterType="String" resultType="String">
+		select id from member where email = #{email}
+	</select>
+	
+	<!-- 마이 페이지 -->
+	<select id="view" resultType="com.ezbook.member.vo.MemberVO">
+		select id, name, gender, email, tel, addr1, addr2, addr3
+		from member
+		where id = #{id}
+	</select>
+	
+	<!-- 회원정보 수정 -->
+	<update id="update">
+		update member
+		set pw = #{pw}, gender = #{gender}, tel = #{tel}, email = #{email}, birth = #{birth}, addr1 = #{addr1}, addr2 = #{addr2}, addr3 = #{addr3}
+		where id = #{id}
+	</update>
+	
+	<!-- 회원 탈퇴 -->
+	<delete id="delete">
+		delete from member
+		where id = #{id}
+		and pw = #{pw}
+	</delete>
+	
+</mapper>

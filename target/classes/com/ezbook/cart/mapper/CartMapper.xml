@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ezbook.cart.mapper.CartMapper">
+
+	<!-- 카트 리스트 -->
+	<select id="cartList" resultType="com.ezbook.cart.vo.CartListVO">
+		select row_number() over(order by c.cartNum desc) as num,  c.cartNum, c.Id, c.No, c.cartStock, c.addDate, b.bookName, b.bookPrice, b.fileName
+		from books_cart c
+		inner join books b
+		on c.no = b.no
+		where c.id = #{id}
+	</select>
+	
+	<!-- 카트 삭제 -->
+	<delete id="deleteCart">
+		delete books_cart
+		where cartNum = #{cartNum}
+		and id = #{id}
+	</delete>
+
+</mapper>

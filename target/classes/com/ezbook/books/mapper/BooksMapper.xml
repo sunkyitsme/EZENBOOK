@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ezbook.books.mapper.BooksMapper">
+
+	<!-- 1. 판매 도서 목록 -->
+	<select id="list" resultType="com.ezbook.books.vo.BooksVO">
+		select no, bookName, writer, bookPrice, fileName
+		from (
+		select rownum rnum, no, bookName, writer, bookPrice, fileName
+		from(
+		select no, bookName, writer, bookPrice, fileName
+		from books
+		where (1=1)
+		<include refid="search" />
+		order by no desc
+		)
+		)
+		where rnum between #{startRow} and #{endRow}
+	</select>
+
+	<!-- 1.1 전체 데이터 개수 -->
+	<select id="getTotalRow" resultType="Long">
+		select count(*) from books
+		where (1 = 1)
+		<include refid="search" />
+	</select>
+
+	<!-- 검색 조건 처리를 위한 태그 - 부분 태그 : SQL : 동적쿼리 작성 - 일반 조건 -->
+	<sql id="search">
+		<if test="word != null and word != ''.toString">
+			and (
+			<if test="key == 'n'.toString()">
+				bookName like '%' || #{word} || '%'
+			</if>
+			<if test="key == 'w'.toString()">
+				writer like '%' || #{word} || '%'
+			</if>
+			<if test="key == 'nw'.toString()">
+				bookName like '%' || #{word} || '%'
+				or writer like '%' || #{word} | | '%'
+			</if>
+			)
+		</if>
+	</sql>
+
+	<!-- 2. 글보기 -->
+	<select id="view" resultType="com.ezbook.books.vo.BooksVO">
+		select no, bookName, writer,
+		publeYear, publisher, bookPrice, content, fileName, bookInfo, bookStock
+		from books
+		where no = #{no}
+	</select>
+
+	<!-- 2-1. 이미지 변경 -->
+	<update id="changeImage">
+		update books
+		set fileName = #{fileName}
+		where no = #{no}
+	</update>
+
+	<!-- 3. 글쓰기 -->
+	<insert id="write">
+		insert into books(no, bookName, writer, publeYear, publisher, bookPrice, id, content, fileName, bookInfo)
+		values(books_seq.nextval, #{bookName}, #{writer}, #{publeYear}, #{publisher}, #{bookPrice}, #{id}, #{content}, #{fileName}, #{bookInfo})
+	</insert>
+
+	<!-- 4. 글수정 -->
+	<update id="update">
+		update books
+		set bookName = #{bookName}, writer = #{writer}, publeYear = #{publeYear}, publisher = #{publisher}, bookPrice = #{bookPrice}, content = #{content}, bookInfo = #{bookInfo}
+		where no = #{no}
+	</update>
+
+	<!-- 5. 이미지 정보 삭제 -->
+	<delete id="delete">
+		delete from books
+		where no = #{no}
+	</delete>
+
+	<!-- 댓글 리스트 -->
+	<select id="replyList" resultType="com.ezbook.books.vo.ReplyListVO">
+		select r.no, r.id, r.repNum, r.repCon, r.repDate, m.name
+		from books_reply r
+		inner join member m
+		on r.id = m.id
+		where no = #{no}
+	</select>
+	
+	<!-- 카트 담기 -->
+	<insert id="addCart">
+		insert into books_cart(cartNum, id, no, cartStock)
+		values(books_cart_seq.nextval, #{id}, #{no}, #{cartStock})
+	</insert>
+
+</mapper>
